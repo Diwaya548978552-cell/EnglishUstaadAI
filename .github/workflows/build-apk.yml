@@ -1,0 +1,43 @@
+name: Build English Ustaad AI APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "EnglishUstaadAI_Android_Starter.zip"
+      - ".github/workflows/build-apk.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Extract Android project
+        run: |
+          unzip -q EnglishUstaadAI_Android_Starter.zip -d extracted
+          ls -la extracted
+          ls -la extracted/EnglishUstaadAI
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: "8.10"
+
+      - name: Build APK
+        working-directory: extracted/EnglishUstaadAI
+        run: gradle :app:assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: EnglishUstaadAI-APK
+          path: extracted/EnglishUstaadAI/app/build/outputs/apk/debug/app-debug.apk
